@@ -23,6 +23,9 @@ export const users = pgTable("users", {
   name: varchar({ length: 255 }).notNull(),
   email: varchar({ length: 255 }).notNull().unique(),
   image: varchar({ length: 255 }),
+  defaultTeamId: cuid()
+    .notNull()
+    .references(() => teams.id),
   ...timestamps,
 });
 

@@ -1,17 +1,20 @@
+import { db, eq, schema } from "@functional-infra/core/db";
 import { type Challenge, createClient } from "@openauthjs/openauth/client";
+import type { SubjectPayload } from "@openauthjs/openauth/subject";
 import { Hono } from "hono";
 import { handle } from "hono/aws-lambda";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { Resource } from "sst";
 import { subjects } from "./subjects";
-import { db, schema } from "@functional-infra/core/db";
 
 const client = createClient({
   issuer: Resource.Auth.url,
   clientID: "api",
 });
 
-const app = new Hono<{ Variables: { subject: unknown } }>()
+const app = new Hono<{
+  Variables: { subject: SubjectPayload<typeof subjects> | null };
+}>()
   .use(async (c, next) => {
     const access = getCookie(c, "access");
     const refresh = getCookie(c, "refresh");
@@ -20,6 +23,7 @@ const app = new Hono<{ Variables: { subject: unknown } }>()
       if (res.err) {
         deleteCookie(c, "access");
         deleteCookie(c, "refresh");
+        c.set("subject", null);
         return next();
       }
       if (res.tokens) {
@@ -27,13 +31,23 @@ const app = new Hono<{ Variables: { subject: unknown } }>()
         setCookie(c, "refresh", res.tokens.refresh);
       }
       c.set("subject", res.subject);
+    } else {
+      c.set("subject", null);
     }
     return next();
   })
   .get("/", async (c) => {
+    const subject = c.get("subject");
     return c.json({
-      subject: c.get("subject"),
-      db: await db.select().from(schema.users).limit(1),
+      subject,
+      team: subject
+        ? await db
+            .select()
+            .from(schema.teams)
+            .where(eq(schema.teams.id, subject.properties.defaultTeamId))
+            .limit(1)
+            .then((res) => res[0])
+        : null,
     });
   })
   .get("/auth", async (c) => {

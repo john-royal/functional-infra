@@ -1,10 +1,9 @@
+import { User } from "@functional-infra/core/example";
 import { issuer } from "@openauthjs/openauth";
 import { GithubProvider } from "@openauthjs/openauth/provider/github";
 import { handle } from "hono/aws-lambda";
 import { Resource } from "sst";
 import { subjects } from "./subjects";
-import { db, schema, eq } from "@functional-infra/core/db";
-import { createId } from "@paralleldrive/cuid2";
 
 const iss = issuer({
   subjects,
@@ -17,45 +16,14 @@ const iss = issuer({
   },
   success: async (ctx, input) => {
     const profile = await fetchGitHubProfile(input.tokenset.access);
-    const user = await db.transaction(async (tx) => {
-      const [existing] = await tx
-        .select({
-          id: schema.users.id,
-          name: schema.users.name,
-          email: schema.users.email,
-          image: schema.users.image,
-        })
-        .from(schema.githubAccounts)
-        .where(eq(schema.githubAccounts.githubId, profile.id.toString()))
-        .innerJoin(
-          schema.users,
-          eq(schema.githubAccounts.userId, schema.users.id),
-        );
-      if (existing) {
-        return existing;
-      }
-      const newUser = {
-        id: createId(),
-        name: profile.name,
-        email: profile.email,
-        image: profile.avatar_url,
-      };
-      await tx.insert(schema.users).values(newUser);
-      await tx.insert(schema.githubAccounts).values({
-        id: createId(),
-        userId: newUser.id,
-        githubId: profile.id.toString(),
-        username: profile.login,
-        accessToken: input.tokenset.access,
-        accessTokenExpiresAt: input.tokenset.expiry
-          ? new Date(input.tokenset.expiry)
-          : undefined,
-        refreshToken: input.tokenset.refresh,
-      });
-      return newUser;
+    const { userId, defaultTeamId } = await User.findOrCreate(profile, {
+      accessToken: input.tokenset.access,
+      refreshToken: input.tokenset.refresh,
+      accessTokenExpiresAt: new Date(input.tokenset.expiry),
     });
     return ctx.subject("user", {
-      id: user.id,
+      id: userId,
+      defaultTeamId,
     });
   },
 });

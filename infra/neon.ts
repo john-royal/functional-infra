@@ -33,3 +33,11 @@ new command.local.Command(
   },
   { dependsOn: neonProject },
 );
+
+new sst.x.DevCommand("DrizzleStudio", {
+  dev: {
+    command: "bun run db:studio",
+    directory: "packages/core",
+  },
+  link: [neonProject],
+});

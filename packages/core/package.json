@@ -3,21 +3,21 @@
   "type": "module",
   "version": "0.0.0",
   "scripts": {
-    "test": "sst shell vitest",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
   },
   "exports": {
     "./*": "./src/*/index.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",
+    "@paralleldrive/cuid2": "^2.2.2",
     "drizzle-orm": "^0.43.1",
     "sst": "*",
     "ws": "^8.18.2"
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",
-    "drizzle-kit": "^0.31.1",
-    "vitest": "^2"
+    "drizzle-kit": "^0.31.1"
   }
 }
