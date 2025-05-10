@@ -7,11 +7,13 @@ export default $config({
       removal: input?.stage === "production" ? "retain" : "remove",
       protect: ["production"].includes(input?.stage),
       home: "aws",
+      providers: { neon: "0.9.0", command: "1.0.4" },
     };
   },
   async run() {
     const storage = await import("./infra/storage");
     await import("./infra/api");
+    await import("./infra/neon");
 
     return {
       MyBucket: storage.bucket.name,

@@ -15,5 +15,8 @@
   "dependencies": {
     "sst": "^3"
   },
-  "trustedDependencies": ["@biomejs/biome"]
+  "trustedDependencies": ["@biomejs/biome"],
+  "engines": {
+    "node": ">=22"
+  }
 }

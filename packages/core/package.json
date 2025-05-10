@@ -3,15 +3,19 @@
   "type": "module",
   "version": "0.0.0",
   "scripts": {
-    "test": "sst shell vitest"
+    "test": "sst shell vitest",
+    "db:push": "sst shell drizzle-kit push"
   },
   "exports": {
     "./*": ["./src/*/index.ts", "./src/*.ts"]
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.0",
+    "drizzle-orm": "^0.43.1",
     "sst": "*"
   },
   "devDependencies": {
+    "drizzle-kit": "^0.31.1",
     "vitest": "^2"
   }
 }

@@ -14,6 +14,11 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Bucket"
     }
+    "Neon": {
+      "connectionUri": string
+      "connectionUriPooler": string
+      "type": "neon.index/project.Project"
+    }
   }
 }
 /// <reference path="sst-env.d.ts" />
