@@ -4,7 +4,11 @@
   "type": "module",
   "dependencies": {
     "@functional-infra/core": "*",
-    "sst": "*"
+    "@openauthjs/openauth": "^0.4.3",
+    "@paralleldrive/cuid2": "^2.2.2",
+    "hono": "^4.7.9",
+    "sst": "*",
+    "zod": "^4.0.0-beta.20250505T195954"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8"

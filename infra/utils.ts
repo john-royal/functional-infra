@@ -1,6 +1,6 @@
-import { join } from "node:path";
 import { createHash } from "node:crypto";
 import { glob, readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 export const hashFiles = async (dir: string, patterns: string[]) => {
   const hash = createHash("sha256");

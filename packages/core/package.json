@@ -4,17 +4,19 @@
   "version": "0.0.0",
   "scripts": {
     "test": "sst shell vitest",
-    "db:push": "sst shell drizzle-kit push"
+    "db:push": "drizzle-kit push"
   },
   "exports": {
-    "./*": ["./src/*/index.ts", "./src/*.ts"]
+    "./*": "./src/*/index.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",
     "drizzle-orm": "^0.43.1",
-    "sst": "*"
+    "sst": "*",
+    "ws": "^8.18.2"
   },
   "devDependencies": {
+    "@types/ws": "^8.18.1",
     "drizzle-kit": "^0.31.1",
     "vitest": "^2"
   }
