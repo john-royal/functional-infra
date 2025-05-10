@@ -1,15 +1,19 @@
 {
-  "name": "monorepo-template",
+  "name": "functional-infra",
   "version": "0.0.0",
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {},
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "sst dev",
+    "check": "biome check",
+    "check:fix": "biome check --fix"
+  },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@tsconfig/node22": "^22",
     "typescript": "^5"
   },
   "dependencies": {
     "sst": "^3"
-  }
+  },
+  "trustedDependencies": ["@biomejs/biome"]
 }
