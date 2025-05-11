@@ -27,7 +27,7 @@ new command.local.Command(
     environment: {
       SST_RESOURCE_App: JSON.stringify($app),
       SST_RESOURCE_Neon: $jsonStringify({
-        connectionUri: neonProject.connectionUri,
+        connectionUri: neonProject.connectionUriPooler,
       }),
     },
   },

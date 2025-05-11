@@ -7,7 +7,7 @@ export default $config({
       removal: input?.stage === "production" ? "retain" : "remove",
       protect: ["production"].includes(input?.stage),
       home: "aws",
-      providers: { neon: "0.9.0", command: "1.0.4" },
+      providers: { neon: "0.9.0", command: "1.0.4", random: "4.18.2" },
     };
   },
   async run() {
@@ -15,7 +15,6 @@ export default $config({
     await import("./infra/api");
     await import("./infra/neon");
     await import("./infra/auth");
-
     return {
       MyBucket: storage.bucket.name,
     };

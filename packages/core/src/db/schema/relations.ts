@@ -4,7 +4,7 @@ import {
   environmentVariables,
   environments,
   githubAccounts,
-  githubConnections,
+  githubInstallations,
   projects,
   teamMembers,
   teams,
@@ -28,7 +28,7 @@ export const githubAccountsRelations = relations(githubAccounts, ({ one }) => ({
 
 export const teamsRelations = relations(teams, ({ many }) => ({
   teamMembers: many(teamMembers),
-  githubConnections: many(githubConnections),
+  githubInstallations: many(githubInstallations),
   projects: many(projects),
 }));
 
@@ -43,11 +43,11 @@ export const teamMembersRelations = relations(teamMembers, ({ one }) => ({
   }),
 }));
 
-export const githubConnectionsRelations = relations(
-  githubConnections,
+export const githubInstallationsRelations = relations(
+  githubInstallations,
   ({ one }) => ({
     team: one(teams, {
-      fields: [githubConnections.teamId],
+      fields: [githubInstallations.teamId],
       references: [teams.id],
     }),
   }),
@@ -58,9 +58,9 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
     fields: [projects.teamId],
     references: [teams.id],
   }),
-  githubConnection: one(githubConnections, {
-    fields: [projects.githubConnectionId],
-    references: [githubConnections.id],
+  githubInstallation: one(githubInstallations, {
+    fields: [projects.githubInstallationId],
+    references: [githubInstallations.id],
   }),
   environments: many(environments),
   environmentVariables: many(environmentVariables),

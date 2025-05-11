@@ -9,11 +9,19 @@ declare module "sst" {
       "type": "sst.aws.Auth"
       "url": string
     }
+    "GITHUB_APP_ID": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "GITHUB_CLIENT_ID": {
       "type": "sst.sst.Secret"
       "value": string
     }
     "GITHUB_CLIENT_SECRET": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "GITHUB_PRIVATE_KEY": {
       "type": "sst.sst.Secret"
       "value": string
     }
@@ -30,6 +38,10 @@ declare module "sst" {
       "connectionUri": string
       "connectionUriPooler": string
       "type": "neon.index/project.Project"
+    }
+    "StateSecret": {
+      "type": "random.index/randomPassword.RandomPassword"
+      "value": string
     }
   }
 }

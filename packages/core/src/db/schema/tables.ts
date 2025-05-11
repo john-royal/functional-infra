@@ -1,4 +1,5 @@
 import {
+  bigint,
   boolean,
   char,
   pgEnum,
@@ -72,17 +73,17 @@ export const teamMembers = pgTable(
 
 export const targetType = pgEnum("target_type", ["user", "organization"]);
 
-export const githubConnections = pgTable("github_connections", {
+export const githubInstallations = pgTable("github_installations", {
   id: cuid().primaryKey(),
   teamId: cuid()
     .notNull()
     .references(() => teams.id),
   installationId: varchar({ length: 255 }).notNull().unique(),
   targetType: targetType().notNull(),
-  targetId: varchar({ length: 255 }).notNull(),
+  targetId: bigint({ mode: "number" }).notNull(),
   targetName: varchar({ length: 255 }).notNull(),
-  accessToken: varchar({ length: 255 }).notNull(),
-  accessTokenExpiresAt: timestamp().notNull(),
+  accessToken: varchar({ length: 255 }),
+  accessTokenExpiresAt: timestamp(),
   ...timestamps,
 });
 
@@ -91,9 +92,9 @@ export const projects = pgTable("projects", {
   teamId: cuid()
     .notNull()
     .references(() => teams.id),
-  githubConnectionId: cuid()
+  githubInstallationId: cuid()
     .notNull()
-    .references(() => githubConnections.id),
+    .references(() => githubInstallations.id),
   githubRepositoryUrl: varchar({ length: 255 }).notNull(),
   gitProductionBranch: varchar({ length: 100 }).notNull().default("main"),
   name: varchar({ length: 255 }).notNull(),

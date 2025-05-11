@@ -8,6 +8,7 @@ import {
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import { Resource } from "sst";
 import * as schema from "./schema";
+import { Pool } from "@neondatabase/serverless";
 
 if (typeof WebSocket === "undefined") {
   const { neonConfig } = await import("@neondatabase/serverless");
@@ -15,7 +16,10 @@ if (typeof WebSocket === "undefined") {
   neonConfig.webSocketConstructor = WebSocket;
 }
 
-export const db = drizzle(Resource.Neon.connectionUriPooler, {
+export const pool = new Pool({
+  connectionString: Resource.Neon.connectionUriPooler,
+});
+export const db = drizzle(pool, {
   schema,
 });
 
