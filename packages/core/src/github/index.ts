@@ -57,26 +57,12 @@ export namespace GitHub {
     return installations;
   }
 
-  export async function handle(webhook: WebhookEvent) {
-    if (
-      "installation" in webhook &&
-      "action" in webhook &&
-      webhook.action === "deleted"
-    ) {
-      const event = webhook as InstallationDeletedEvent;
-      await useTransaction(async (tx) => {
-        console.log("deleted", event.installation.id);
-        await tx
-          .delete(schema.githubInstallations)
-          .where(
-            eq(
-              schema.githubInstallations.installationId,
-              event.installation.id.toString(),
-            ),
-          );
-      });
-    } else {
-      console.log("unhandled event", webhook);
-    }
+  export async function deleteInstallation(id: string) {
+    await useTransaction(async (tx) => {
+      console.log("deleted", id);
+      await tx
+        .delete(schema.githubInstallations)
+        .where(eq(schema.githubInstallations.installationId, id));
+    });
   }
 }

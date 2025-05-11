@@ -12,6 +12,10 @@ const stateSecret = new random.RandomPassword("StateSecret", {
   length: 32,
 });
 
+const webhookSecret = new random.RandomPassword("WebhookSecret", {
+  length: 64,
+});
+
 export const myApi = new sst.aws.Function("MyApi", {
   url: true,
   link: [
@@ -19,6 +23,7 @@ export const myApi = new sst.aws.Function("MyApi", {
     auth,
     neonProject,
     stateSecret,
+    webhookSecret,
     new sst.Secret("GITHUB_PRIVATE_KEY"),
     new sst.Secret("GITHUB_APP_ID"),
   ],

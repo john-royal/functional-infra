@@ -5,6 +5,7 @@
   "dependencies": {
     "@functional-infra/core": "*",
     "@hono/zod-validator": "^0.5.0",
+    "@octokit/webhooks": "^13.8.2",
     "@openauthjs/openauth": "^0.4.3",
     "@paralleldrive/cuid2": "^2.2.2",
     "hono": "^4.7.9",

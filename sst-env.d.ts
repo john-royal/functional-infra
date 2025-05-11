@@ -43,6 +43,10 @@ declare module "sst" {
       "type": "random.index/randomPassword.RandomPassword"
       "value": string
     }
+    "WebhookSecret": {
+      "type": "random.index/randomPassword.RandomPassword"
+      "value": string
+    }
   }
 }
 /// <reference path="sst-env.d.ts" />

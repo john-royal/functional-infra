@@ -9,6 +9,7 @@ import { GitHub } from "@functional-infra/core/github";
 import { client } from "../client";
 import { getCookie, setCookie } from "hono/cookie";
 import type { Challenge } from "@openauthjs/openauth/client";
+import { Webhooks, createWebMiddleware } from "@octokit/webhooks";
 
 const app = new Hono().use(getAuth);
 
@@ -93,10 +94,19 @@ app.get(
   },
 );
 
+const webhooks = new Webhooks({
+  secret: Resource.WebhookSecret.value,
+});
+webhooks.on("installation.deleted", async (event) => {
+  await GitHub.deleteInstallation(event.payload.installation.id.toString());
+});
+webhooks.onAny(async (event) => {
+  console.log({ name: event.name, id: event.id });
+});
+const middleware = createWebMiddleware(webhooks);
+
 app.post("/github/webhook", async (c) => {
-  const body = await c.req.json();
-  await GitHub.handle(body);
-  return c.text("ok");
+  return await middleware(c.req.raw);
 });
 
 export const handler = handle(app);
