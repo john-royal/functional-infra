@@ -9,7 +9,7 @@ import { GitHub } from "@functional-infra/core/github";
 import { client } from "../client";
 import { getCookie, setCookie } from "hono/cookie";
 import type { Challenge } from "@openauthjs/openauth/client";
-import { Webhooks, createWebMiddleware } from "@octokit/webhooks";
+import { Webhooks } from "@octokit/webhooks";
 
 const app = new Hono().use(getAuth);
 
@@ -101,12 +101,35 @@ webhooks.on("installation.deleted", async (event) => {
   await GitHub.deleteInstallation(event.payload.installation.id.toString());
 });
 webhooks.onAny(async (event) => {
-  console.log({ name: event.name, id: event.id });
+  console.log(`Received ${event.name} event with id ${event.id}`);
 });
-const middleware = createWebMiddleware(webhooks);
 
-app.post("/github/webhook", async (c) => {
-  return await middleware(c.req.raw);
-});
+app.post(
+  "/github/webhook",
+  zValidator(
+    "header",
+    z.object({
+      "x-hub-signature-256": z.string(),
+      "x-github-event": z.string(),
+      "x-github-delivery": z.string(),
+    }),
+  ),
+  async (c) => {
+    const headers = c.req.valid("header");
+    const payload = await c.req.text();
+
+    try {
+      await webhooks.verifyAndReceive({
+        id: headers["x-github-delivery"],
+        name: headers["x-github-event"],
+        signature: headers["x-hub-signature-256"],
+        payload,
+      });
+      return c.text("OK", 200);
+    } catch (e) {
+      return c.text("Invalid signature", 401);
+    }
+  },
+);
 
 export const handler = handle(app);
