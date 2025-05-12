@@ -1,20 +1,13 @@
 import { auth } from "./auth";
 import { neonProject } from "./neon";
 import { bucket } from "./storage";
-
-sst.Linkable.wrap(random.RandomPassword, (resource) => ({
-  properties: {
-    value: $util.secret(resource.result),
-  },
-}));
-
-const stateSecret = new random.RandomPassword("StateSecret", {
-  length: 32,
-});
-
-const webhookSecret = new random.RandomPassword("WebhookSecret", {
-  length: 64,
-});
+import {
+  GITHUB_PRIVATE_KEY,
+  GITHUB_APP_ID,
+  GITHUB_WEBHOOK_SECRET,
+  GITHUB_STATE_SECRET,
+} from "./secrets";
+import { redis } from "./redis";
 
 export const myApi = new sst.aws.Function("MyApi", {
   url: true,
@@ -22,10 +15,11 @@ export const myApi = new sst.aws.Function("MyApi", {
     bucket,
     auth,
     neonProject,
-    stateSecret,
-    webhookSecret,
-    new sst.Secret("GITHUB_PRIVATE_KEY"),
-    new sst.Secret("GITHUB_APP_ID"),
+    GITHUB_PRIVATE_KEY,
+    GITHUB_APP_ID,
+    GITHUB_WEBHOOK_SECRET,
+    GITHUB_STATE_SECRET,
+    redis,
   ],
   handler: "packages/functions/src/api/index.handler",
 });

@@ -7,16 +7,18 @@
     "check": "biome check",
     "check:fix": "biome check --fix"
   },
+  "dependencies": {
+    "sst": "^3.14.14"
+  },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@tsconfig/node22": "^22",
-    "typescript": "^5"
+    "@tsconfig/bun": "^1.0.7",
+    "@tsconfig/node22": "^22.0.1",
+    "typescript": "^5.8.3"
   },
-  "dependencies": {
-    "sst": "^3"
-  },
-  "trustedDependencies": ["@biomejs/biome"],
   "engines": {
-    "node": ">=22"
-  }
+    "node": ">=22",
+    "bun": ">=1.2.13"
+  },
+  "trustedDependencies": ["@biomejs/biome"]
 }

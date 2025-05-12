@@ -30,6 +30,9 @@ export const users = pgTable("users", {
   ...timestamps,
 });
 
+export type NewUser = typeof users.$inferInsert;
+export type User = typeof users.$inferSelect;
+
 export const githubAccounts = pgTable("github_accounts", {
   id: cuid().primaryKey(),
   userId: cuid()
@@ -43,6 +46,9 @@ export const githubAccounts = pgTable("github_accounts", {
   accessTokenExpiresAt: timestamp(),
   ...timestamps,
 });
+
+export type NewGitHubAccount = typeof githubAccounts.$inferInsert;
+export type GitHubAccount = typeof githubAccounts.$inferSelect;
 
 export const teamType = pgEnum("team_type", ["personal", "organization"]);
 
@@ -71,6 +77,8 @@ export const teamMembers = pgTable(
   (t) => [primaryKey({ columns: [t.teamId, t.userId] })],
 );
 
+export type TeamMember = typeof teamMembers.$inferSelect;
+
 export const targetType = pgEnum("target_type", ["user", "organization"]);
 
 export const githubInstallations = pgTable("github_installations", {
@@ -87,6 +95,9 @@ export const githubInstallations = pgTable("github_installations", {
   ...timestamps,
 });
 
+export type NewGitHubInstallation = typeof githubInstallations.$inferInsert;
+export type GitHubInstallation = typeof githubInstallations.$inferSelect;
+
 export const projects = pgTable("projects", {
   id: cuid().primaryKey(),
   teamId: cuid()
@@ -95,12 +106,16 @@ export const projects = pgTable("projects", {
   githubInstallationId: cuid()
     .notNull()
     .references(() => githubInstallations.id),
-  githubRepositoryUrl: varchar({ length: 255 }).notNull(),
+  githubRepositoryId: bigint({ mode: "number" }).notNull(),
+  githubRepositoryName: varchar({ length: 255 }).notNull(),
   gitProductionBranch: varchar({ length: 100 }).notNull().default("main"),
   name: varchar({ length: 255 }).notNull(),
   slug: varchar({ length: 255 }).notNull().unique(),
   ...timestamps,
 });
+
+export type NewProject = typeof projects.$inferInsert;
+export type Project = typeof projects.$inferSelect;
 
 export const environments = pgTable("environments", {
   id: cuid().primaryKey(),
@@ -111,6 +126,9 @@ export const environments = pgTable("environments", {
   slug: varchar({ length: 255 }).notNull().unique(),
   ...timestamps,
 });
+
+export type NewEnvironment = typeof environments.$inferInsert;
+export type Environment = typeof environments.$inferSelect;
 
 export const environmentVariables = pgTable("environment_variables", {
   id: cuid().primaryKey(),
@@ -125,6 +143,9 @@ export const environmentVariables = pgTable("environment_variables", {
   isSecret: boolean().notNull(),
   ...timestamps,
 });
+
+export type NewEnvironmentVariable = typeof environmentVariables.$inferInsert;
+export type EnvironmentVariable = typeof environmentVariables.$inferSelect;
 
 export const deploymentStatus = pgEnum("deployment_status", [
   "queued",
@@ -156,3 +177,6 @@ export const deployments = pgTable("deployments", {
   trigger: deploymentTrigger().notNull(),
   ...timestamps,
 });
+
+export type NewDeployment = typeof deployments.$inferInsert;
+export type Deployment = typeof deployments.$inferSelect;

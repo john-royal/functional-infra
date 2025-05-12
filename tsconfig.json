@@ -1,3 +1,4 @@
 {
-    "compilerOptions": {"module": "ESNext","target": "ESNext"}
+  "extends": "@tsconfig/bun/tsconfig.json",
+  "include": ["sst.config.ts", "infra/**/*"]
 }

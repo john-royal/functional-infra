@@ -1,4 +1,3 @@
-import { AsyncLocalStorage } from "node:async_hooks";
 import type { ExtractTablesWithRelations } from "drizzle-orm";
 import {
   type NeonDatabase,
@@ -9,6 +8,7 @@ import type { PgTransaction } from "drizzle-orm/pg-core";
 import { Resource } from "sst";
 import * as schema from "./schema";
 import { Pool } from "@neondatabase/serverless";
+import { createContext } from "../context";
 
 if (typeof WebSocket === "undefined") {
   const { neonConfig } = await import("@neondatabase/serverless");
@@ -30,23 +30,23 @@ type DatabaseTransaction = PgTransaction<
   ExtractTablesWithRelations<typeof schema>
 >;
 
-const transactionContext = new AsyncLocalStorage<DatabaseTransaction>();
+const transactionContext = createContext<DatabaseTransaction>();
 
 export function useTransaction<T>(
   fn: (tx: Database | DatabaseTransaction) => T,
 ) {
-  const tx = transactionContext.getStore();
+  const tx = transactionContext.use();
   return fn(tx ?? db);
 }
 
 export function createTransaction<T>(
   fn: (tx: DatabaseTransaction) => Promise<T>,
 ) {
-  const tx = transactionContext.getStore();
+  const tx = transactionContext.use();
   if (tx) {
     return fn(tx);
   }
-  return db.transaction((tx) => transactionContext.run(tx, fn, tx));
+  return db.transaction((tx) => transactionContext.provide(tx, fn, tx));
 }
 
 export { schema };

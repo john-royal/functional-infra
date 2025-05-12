@@ -1,14 +1,56 @@
-import type { SubjectPayload } from "@openauthjs/openauth/subject";
-import { deleteCookie, getCookie, setCookie } from "hono/cookie";
-import { createFactory, createMiddleware } from "hono/factory";
-import { client } from "../client";
-import { subjects } from "../subjects";
-import type { Context } from "hono";
 import type { Tokens } from "@openauthjs/openauth/client";
+import { createClient } from "@openauthjs/openauth/client";
+import type { SubjectPayload } from "@openauthjs/openauth/subject";
+import type { Context } from "hono";
+import { deleteCookie, getCookie, setCookie } from "hono/cookie";
+import { createMiddleware } from "hono/factory";
+import { Resource } from "sst";
+import { subjects } from "../subjects";
+
+export const authClient = createClient({
+  issuer: Resource.Auth.url,
+  clientID: "api",
+});
+export type Subject = SubjectPayload<typeof subjects>;
+
+const getTokens = (c: Context) => {
+  return {
+    access: getCookie(c, "access"),
+    refresh: getCookie(c, "refresh"),
+  };
+};
+
+const validateTokens = async (c: Context) => {
+  const { access, refresh } = getTokens(c);
+  if (!access && !refresh) {
+    return null;
+  }
+  const res = await authClient.verify(subjects, access ?? "", { refresh });
+  if (res.err) {
+    clearTokens(c);
+    return null;
+  }
+  if (res.tokens) {
+    setTokens(c, res.tokens);
+  }
+  return res.subject;
+};
 
 export const setTokens = (c: Context, tokens: Tokens) => {
-  setCookie(c, "access", tokens.access);
-  setCookie(c, "refresh", tokens.refresh);
+  setCookie(c, "access", tokens.access, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+  setCookie(c, "refresh", tokens.refresh, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 30,
+  });
 };
 
 export const clearTokens = (c: Context) => {
@@ -17,27 +59,15 @@ export const clearTokens = (c: Context) => {
 };
 
 export const getAuth = createMiddleware<{
-  Variables: { subject?: SubjectPayload<typeof subjects> };
+  Variables: { subject: Subject | null };
 }>(async (c, next) => {
-  const access = getCookie(c, "access");
-  const refresh = getCookie(c, "refresh");
-  if (!access) {
-    return next();
-  }
-  const res = await client.verify(subjects, access, { refresh });
-  if (res.err) {
-    clearTokens(c);
-    return next();
-  }
-  if (res.tokens) {
-    setTokens(c, res.tokens);
-  }
-  c.set("subject", res.subject);
+  const subject = await validateTokens(c);
+  c.set("subject", subject);
   return next();
 });
 
 export const requireAuth = createMiddleware<{
-  Variables: { subject: SubjectPayload<typeof subjects> };
+  Variables: { subject: Subject };
 }>(async (c, next) => {
   if (!c.get("subject")) {
     return c.json({ error: "Unauthorized" }, 401);

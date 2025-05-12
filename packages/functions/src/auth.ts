@@ -11,11 +11,10 @@ const iss = issuer({
     github: GithubProvider({
       clientID: Resource.GITHUB_CLIENT_ID.value,
       clientSecret: Resource.GITHUB_CLIENT_SECRET.value,
-      scopes: ["user:email", "read:user"],
+      scopes: [], // this is determined by GitHub App permissions
     }),
   },
   success: async (ctx, input) => {
-    console.log(input.tokenset.raw);
     const profile = await fetchGitHubProfile(input.tokenset.access);
     const { userId, defaultTeamId } = await User.findOrCreate(profile, {
       accessToken: input.tokenset.access,
@@ -49,7 +48,7 @@ const fetchGitHubProfile = async (accessToken: string) => {
     const emails = await fetch("https://api.github.com/user/emails", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        "User-Agent": "ChatOS (Dev)",
+        "User-Agent": "Functional.dev",
       },
     }).then(
       (res) =>
