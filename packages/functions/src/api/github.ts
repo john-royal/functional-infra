@@ -1,11 +1,11 @@
 import { GithubInstallation } from "@functional-infra/core/github-installation";
-import { zValidator } from "@hono/zod-validator";
+import { sValidator } from "@hono/standard-validator";
 import { Webhooks } from "@octokit/webhooks";
 import { Hono } from "hono";
+import { SignJWT, jwtVerify } from "jose";
 import { Resource } from "sst";
 import { z } from "zod";
 import { requireAuth } from "./common";
-import { jwtVerify, SignJWT } from "jose";
 
 const webhooks = new Webhooks({
   secret: Resource.GITHUB_WEBHOOK_SECRET.value,
@@ -56,7 +56,7 @@ export const githubRouter = new Hono()
   })
   .get(
     "/install/callback",
-    zValidator(
+    sValidator(
       "query",
       z
         .object({
@@ -80,7 +80,7 @@ export const githubRouter = new Hono()
   )
   .post(
     "/webhook",
-    zValidator(
+    sValidator(
       "header",
       z.object({
         "x-hub-signature-256": z.string(),

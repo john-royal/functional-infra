@@ -1,8 +1,8 @@
+import { sValidator } from "@hono/standard-validator";
 import { type Context, Hono } from "hono";
 import { deleteCookie, setCookie } from "hono/cookie";
 import { z } from "zod";
-import { zValidator } from "@hono/zod-validator";
-import { authClient, setTokens, type Subject } from "./common";
+import { type Subject, authClient, setTokens } from "./common";
 
 const getRedirectURI = (c: Context) =>
   new URL("/auth/callback", c.req.url).toString();
@@ -29,7 +29,7 @@ export const authRouter = new Hono<{
   })
   .get(
     "/callback",
-    zValidator(
+    sValidator(
       "query",
       z.union([
         z.object({
@@ -42,7 +42,7 @@ export const authRouter = new Hono<{
         }),
       ]),
     ),
-    zValidator(
+    sValidator(
       "cookie",
       z.object({
         challenge: z
