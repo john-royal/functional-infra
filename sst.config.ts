@@ -20,6 +20,7 @@ export default $config({
     await import("./infra/auth");
     await import("./infra/api");
     await import("./infra/neon");
+    await import("./infra/web");
     return {
       MyBucket: storage.bucket.name,
     };

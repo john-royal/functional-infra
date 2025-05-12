@@ -3,7 +3,7 @@ import { issuer } from "@openauthjs/openauth";
 import { GithubProvider } from "@openauthjs/openauth/provider/github";
 import { handle } from "hono/aws-lambda";
 import { Resource } from "sst";
-import { subjects } from "./subjects";
+import { subjects } from "@functional-infra/core/auth";
 
 const iss = issuer({
   subjects,
@@ -14,6 +14,7 @@ const iss = issuer({
       scopes: [], // this is determined by GitHub App permissions
     }),
   },
+  allow: () => Promise.resolve(true), // TODO: verify
   success: async (ctx, input) => {
     const profile = await fetchGitHubProfile(input.tokenset.access);
     const { userId, defaultTeamId } = await User.findOrCreate(profile, {

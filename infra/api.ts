@@ -9,7 +9,7 @@ import {
 } from "./secrets";
 import { redis } from "./redis";
 
-export const myApi = new sst.aws.Function("MyApi", {
+export const api = new sst.aws.Function("MyApi", {
   url: true,
   link: [
     bucket,

@@ -4,6 +4,7 @@
   "type": "module",
   "dependencies": {
     "@functional-infra/core": "*",
+    "@hono/trpc-server": "^0.3.4",
     "@hono/zod-validator": "^0.5.0",
     "@octokit/webhooks": "^13.8.2",
     "@openauthjs/openauth": "^0.4.3",
@@ -11,7 +12,7 @@
     "hono": "^4.7.9",
     "jose": "^6.0.11",
     "sst": "*",
-    "zod": "^3.24.4"
+    "zod": "^4.0.0-beta.20250505T195954"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8"

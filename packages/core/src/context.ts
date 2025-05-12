@@ -13,6 +13,6 @@ export function createContext<T>() {
       }
       return result;
     },
-    provide: storage.run,
+    provide: storage.run.bind(storage),
   };
 }

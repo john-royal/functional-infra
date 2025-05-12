@@ -1,5 +1,6 @@
 import { createId } from "@paralleldrive/cuid2";
 import { createTransaction, eq, schema, useTransaction } from "../db";
+import assert from "node:assert";
 
 export namespace User {
   export function findOrCreate(
@@ -39,6 +40,18 @@ export namespace User {
         TeamMember.create(userId, defaultTeamId, "owner"),
       ]);
       return { userId, defaultTeamId };
+    });
+  }
+
+  export function byId(id: string) {
+    return useTransaction(async (tx) => {
+      const users = await tx
+        .select()
+        .from(schema.users)
+        .where(eq(schema.users.id, id))
+        .limit(1);
+      assert(users.length === 1, `User ${id} not found`);
+      return users[0];
     });
   }
 

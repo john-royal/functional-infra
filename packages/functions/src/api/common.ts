@@ -5,7 +5,7 @@ import type { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { Resource } from "sst";
-import { subjects } from "../subjects";
+import { subjects } from "@functional-infra/core/auth";
 
 export const authClient = createClient({
   issuer: Resource.Auth.url,
@@ -15,7 +15,8 @@ export type Subject = SubjectPayload<typeof subjects>;
 
 const getTokens = (c: Context) => {
   return {
-    access: getCookie(c, "access"),
+    access:
+      getCookie(c, "access") ?? c.req.header("Authorization")?.split(" ")[1],
     refresh: getCookie(c, "refresh"),
   };
 };

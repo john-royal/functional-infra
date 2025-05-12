@@ -52,6 +52,14 @@ declare module "sst" {
       "type": "upstash.index/redisDatabase.RedisDatabase"
       "url": string
     }
+    "WEB_SESSION_SECRET": {
+      "type": "random.index/randomPassword.RandomPassword"
+      "value": string
+    }
+    "Web": {
+      "type": "sst.aws.TanstackStart"
+      "url": string
+    }
   }
 }
 /// <reference path="sst-env.d.ts" />
