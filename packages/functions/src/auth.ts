@@ -17,14 +17,14 @@ const iss = issuer({
   allow: () => Promise.resolve(true), // TODO: verify
   success: async (ctx, input) => {
     const profile = await fetchGitHubProfile(input.tokenset.access);
-    const { userId, defaultTeamId } = await User.findOrCreate(profile, {
+    const { userId, defaultTeam } = await User.findOrCreate(profile, {
       accessToken: input.tokenset.access,
       refreshToken: input.tokenset.refresh,
       accessTokenExpiresAt: new Date(Date.now() + input.tokenset.expiry * 1000),
     });
     return ctx.subject("user", {
       id: userId,
-      defaultTeamId,
+      defaultTeam,
     });
   },
 });

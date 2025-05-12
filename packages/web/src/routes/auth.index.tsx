@@ -12,7 +12,6 @@ export const Route = createFileRoute("/auth/")({
     if (subject) {
       throw redirect({ to: "/" });
     }
-    return;
   },
 });
 

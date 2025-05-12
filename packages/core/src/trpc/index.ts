@@ -1,25 +1,60 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { User } from "../example";
+import { and, db, eq, getTableColumns, schema } from "../db";
+import { Team, User } from "../example";
 import { GithubInstallation } from "../github-installation";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "./trpc";
+import { Project } from "../project";
+import { createTRPCRouter, protectedProcedure } from "./trpc";
 
 export const router = createTRPCRouter({
   me: protectedProcedure.query(({ ctx }) =>
     User.byId(ctx.subject.properties.id),
   ),
-  githubInstallations: {
+
+  team: {
     list: protectedProcedure.query(({ ctx }) =>
-      GithubInstallation.list(ctx.subject.properties.defaultTeamId),
+      Team.list(ctx.subject.properties.id),
     ),
 
-    listRepositories: protectedProcedure
-      .input(z.object({ installationId: z.string() }))
-      .query(({ ctx, input }) => {
-        return GithubInstallation.listRepositories(
-          input.installationId,
-          ctx.subject.properties.defaultTeamId,
-        );
+    bySlug: protectedProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ ctx, input }) => {
+        const [team] = await db
+          .select(getTableColumns(schema.teams))
+          .from(schema.teams)
+          .where(eq(schema.teams.slug, input.slug))
+          .limit(1);
+        const [memberCount, projects] = await Promise.all([
+          db.$count(
+            db
+              .select()
+              .from(schema.teamMembers)
+              .where(
+                and(
+                  eq(schema.teamMembers.teamId, team.id),
+                  eq(schema.teamMembers.userId, ctx.subject.properties.id),
+                ),
+              ),
+          ),
+          Project.list(team.id),
+        ]);
+        if (memberCount === 0) {
+          throw new TRPCError({ code: "UNAUTHORIZED" });
+        }
+        return { team, projects };
       }),
+  },
+
+  githubInstallations: {
+    list: protectedProcedure
+      .input(z.object({ teamId: z.string() }))
+      .query(({ input }) => GithubInstallation.list(input.teamId)),
+
+    listRepositories: protectedProcedure
+      .input(z.object({ installationId: z.string(), teamId: z.string() }))
+      .query(({ input }) =>
+        GithubInstallation.listRepositories(input.installationId, input.teamId),
+      ),
   },
 });
 

@@ -7,7 +7,7 @@ import { z } from "zod";
 export const subjects = createSubjects({
   user: z.object({
     id: z.string(),
-    defaultTeamId: z.string(),
+    defaultTeam: z.string(),
   }),
 });
 

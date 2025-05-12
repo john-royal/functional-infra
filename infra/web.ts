@@ -9,7 +9,9 @@ export const web = new sst.aws.TanStackStart("Web", {
   path: "packages/web",
   link: [auth, api, SESSION_SECRET],
   environment: {
-    VITE_ORIGIN: "https://d10rhnn0yafwih.cloudfront.net",
+    VITE_ORIGIN: $dev
+      ? "http://localhost:3000"
+      : "https://d10rhnn0yafwih.cloudfront.net",
     VITE_API_URL: api.url,
   },
 });

@@ -1,6 +1,13 @@
 import assert from "node:assert";
 import { createId } from "@paralleldrive/cuid2";
-import { createTransaction, eq, schema, useTransaction } from "../db";
+import {
+  and,
+  createTransaction,
+  eq,
+  getTableColumns,
+  schema,
+  useTransaction,
+} from "../db";
 
 export namespace User {
   export function findOrCreate(
@@ -20,12 +27,12 @@ export namespace User {
     return createTransaction(async () => {
       const user = await User.byGitHubId(profile.id.toString());
       if (user) return user;
-      const defaultTeamId = await Team.create(profile.name, "personal");
+      const team = await Team.create(profile.name, "personal");
       const userId = await User.create({
         name: profile.name,
         email: profile.email,
         image: profile.avatar_url,
-        defaultTeamId,
+        defaultTeamId: team.id,
       });
       await Promise.all([
         GitHubAccount.create({
@@ -37,9 +44,9 @@ export namespace User {
           refreshToken: credentials.refreshToken,
           accessTokenExpiresAt: credentials.accessTokenExpiresAt,
         }),
-        TeamMember.create(userId, defaultTeamId, "owner"),
+        TeamMember.create(userId, team.id, "owner"),
       ]);
-      return { userId, defaultTeamId };
+      return { userId, defaultTeam: team.slug };
     });
   }
 
@@ -60,13 +67,17 @@ export namespace User {
       const users = await tx
         .select({
           userId: schema.users.id,
-          defaultTeamId: schema.users.defaultTeamId,
+          defaultTeam: schema.teams.slug,
         })
         .from(schema.githubAccounts)
         .where(eq(schema.githubAccounts.githubId, id))
         .innerJoin(
           schema.users,
           eq(schema.githubAccounts.userId, schema.users.id),
+        )
+        .innerJoin(
+          schema.teams,
+          eq(schema.users.defaultTeamId, schema.teams.id),
         );
       return users.length > 0 ? users[0] : null;
     });
@@ -109,6 +120,33 @@ export namespace GitHubAccount {
 }
 
 export namespace Team {
+  export function list(userId: string) {
+    return useTransaction(async (tx) => {
+      return tx
+        .select(getTableColumns(schema.teams))
+        .from(schema.teamMembers)
+        .innerJoin(schema.teams, eq(schema.teamMembers.teamId, schema.teams.id))
+        .where(eq(schema.teamMembers.userId, userId));
+    });
+  }
+
+  export function byId(userId: string, teamId: string) {
+    return useTransaction(async (tx) => {
+      const teams = await tx
+        .select()
+        .from(schema.teamMembers)
+        .innerJoin(schema.teams, eq(schema.teamMembers.teamId, schema.teams.id))
+        .where(
+          and(
+            eq(schema.teamMembers.userId, userId),
+            eq(schema.teamMembers.teamId, teamId),
+          ),
+        );
+      assert(teams.length === 1, `Team ${teamId} not found`);
+      return teams[0];
+    });
+  }
+
   export function create(name: string, type: "personal" | "organization") {
     return useTransaction(async (tx) => {
       const id = createId();
@@ -119,7 +157,7 @@ export namespace Team {
         slug,
         type,
       });
-      return id;
+      return { id, slug };
     });
   }
 }
