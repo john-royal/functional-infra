@@ -1,9 +1,9 @@
+import { Button } from "@/components/ui/button";
+import { signOut } from "@/lib/auth";
 import { useTRPC } from "@/lib/trpc";
 import { useSuspenseQueries } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { signOut } from "@/lib/auth";
 import { useServerFn } from "@tanstack/react-start";
-import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_app/")({
   component: App,

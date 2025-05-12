@@ -1,8 +1,8 @@
-import { z } from "zod";
 import {
-  createSubjects,
   type SubjectPayload,
+  createSubjects,
 } from "@openauthjs/openauth/subject";
+import { z } from "zod";
 
 export const subjects = createSubjects({
   user: z.object({

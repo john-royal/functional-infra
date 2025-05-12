@@ -1,7 +1,7 @@
+import { z } from "zod";
 import { User } from "../example";
 import { GithubInstallation } from "../github-installation";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "./trpc";
-import { z } from "zod";
 
 export const router = createTRPCRouter({
   me: protectedProcedure.query(({ ctx }) =>

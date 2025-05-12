@@ -1,4 +1,4 @@
-import { initTRPC, TRPCError } from "@trpc/server";
+import { TRPCError, initTRPC } from "@trpc/server";
 import type { Subject } from "../auth";
 
 const t = initTRPC.context<{ subject: Subject | null }>().create();

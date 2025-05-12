@@ -1,5 +1,5 @@
-import { GithubInstallation } from "@functional-infra/core/github-installation";
 import { pool } from "@functional-infra/core/db";
+import { GithubInstallation } from "@functional-infra/core/github-installation";
 
 const installation = await GithubInstallation.get(
   "r4dv6k7h6w9w2fd2iwu74c0q",

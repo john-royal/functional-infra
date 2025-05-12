@@ -1,4 +1,4 @@
-import { subjects, type Subject } from "@functional-infra/core/auth";
+import { type Subject, subjects } from "@functional-infra/core/auth";
 import {
   type Challenge,
   type Tokens,

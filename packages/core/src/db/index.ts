@@ -1,3 +1,4 @@
+import { Pool } from "@neondatabase/serverless";
 import type { ExtractTablesWithRelations } from "drizzle-orm";
 import {
   type NeonDatabase,
@@ -6,9 +7,8 @@ import {
 } from "drizzle-orm/neon-serverless";
 import type { PgTransaction } from "drizzle-orm/pg-core";
 import { Resource } from "sst";
-import * as schema from "./schema";
-import { Pool } from "@neondatabase/serverless";
 import { createContext } from "../context";
+import * as schema from "./schema";
 
 if (typeof WebSocket === "undefined") {
   const { neonConfig } = await import("@neondatabase/serverless");

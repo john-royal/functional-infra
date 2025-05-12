@@ -1,11 +1,11 @@
 // To be continued, when SST improves their Cloudflare support...
 
+import { User } from "@functional-infra/core/example";
 import { issuer } from "@openauthjs/openauth";
 import { GithubProvider } from "@openauthjs/openauth/provider/github";
-import { Resource } from "sst";
-import { User } from "@functional-infra/core/example";
-import z from "zod";
 import { createSubjects } from "@openauthjs/openauth/subject";
+import { Resource } from "sst";
+import z from "zod";
 // import { CloudflareStorage } from "@openauthjs/openauth/storage/cloudflare";
 
 const subjects = createSubjects({

@@ -1,11 +1,11 @@
+import { getSubject } from "@/lib/auth";
+import type { TRPCRouter } from "@functional-infra/core/trpc";
+import { QueryClient } from "@tanstack/react-query";
+import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import {
   createTRPCContext,
   createTRPCOptionsProxy,
 } from "@trpc/tanstack-react-query";
-import type { TRPCRouter } from "@functional-infra/core/trpc";
-import { getSubject } from "@/lib/auth";
-import { createTRPCClient, httpBatchLink } from "@trpc/client";
-import { QueryClient } from "@tanstack/react-query";
 
 export const { TRPCProvider, useTRPC } = createTRPCContext<TRPCRouter>();
 

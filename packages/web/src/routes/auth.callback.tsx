@@ -1,6 +1,6 @@
 import { handleCallback } from "@/lib/auth";
-import { createFileRoute } from "@tanstack/react-router";
 import { callbackSchema } from "@/lib/auth";
+import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/auth/callback")({
   component: RouteComponent,

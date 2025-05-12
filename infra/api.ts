@@ -1,13 +1,13 @@
 import { auth } from "./auth";
 import { neonProject } from "./neon";
-import { bucket } from "./storage";
-import {
-  GITHUB_PRIVATE_KEY,
-  GITHUB_APP_ID,
-  GITHUB_WEBHOOK_SECRET,
-  GITHUB_STATE_SECRET,
-} from "./secrets";
 import { redis } from "./redis";
+import {
+  GITHUB_APP_ID,
+  GITHUB_PRIVATE_KEY,
+  GITHUB_STATE_SECRET,
+  GITHUB_WEBHOOK_SECRET,
+} from "./secrets";
+import { bucket } from "./storage";
 
 export const api = new sst.aws.Function("MyApi", {
   url: true,

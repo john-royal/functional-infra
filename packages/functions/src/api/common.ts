@@ -1,3 +1,4 @@
+import { subjects } from "@functional-infra/core/auth";
 import type { Tokens } from "@openauthjs/openauth/client";
 import { createClient } from "@openauthjs/openauth/client";
 import type { SubjectPayload } from "@openauthjs/openauth/subject";
@@ -5,7 +6,6 @@ import type { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { Resource } from "sst";
-import { subjects } from "@functional-infra/core/auth";
 
 export const authClient = createClient({
   issuer: Resource.Auth.url,

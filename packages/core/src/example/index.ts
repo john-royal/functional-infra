@@ -1,6 +1,6 @@
+import assert from "node:assert";
 import { createId } from "@paralleldrive/cuid2";
 import { createTransaction, eq, schema, useTransaction } from "../db";
-import assert from "node:assert";
 
 export namespace User {
   export function findOrCreate(

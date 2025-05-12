@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { redirectToSignIn } from "@/lib/auth";
-import { createFileRoute } from "@tanstack/react-router";
 import { getSubject } from "@/lib/auth";
+import { createFileRoute } from "@tanstack/react-router";
 import { redirect } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 

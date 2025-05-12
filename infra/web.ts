@@ -1,5 +1,5 @@
-import { auth } from "./auth";
 import { api } from "./api";
+import { auth } from "./auth";
 
 const SESSION_SECRET = new random.RandomPassword("WEB_SESSION_SECRET", {
   length: 32,

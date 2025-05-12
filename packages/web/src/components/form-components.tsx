@@ -4,11 +4,11 @@ import { useFieldContext, useFormContext } from "../hooks/form-context";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea as ShadcnTextarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import * as ShadcnSelect from "@/components/ui/select";
 import { Slider as ShadcnSlider } from "@/components/ui/slider";
 import { Switch as ShadcnSwitch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { Textarea as ShadcnTextarea } from "@/components/ui/textarea";
 
 export function SubscribeButton({ label }: { label: string }) {
   const form = useFormContext();

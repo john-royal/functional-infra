@@ -1,9 +1,9 @@
+import { subjects } from "@functional-infra/core/auth";
 import { User } from "@functional-infra/core/example";
 import { issuer } from "@openauthjs/openauth";
 import { GithubProvider } from "@openauthjs/openauth/provider/github";
 import { handle } from "hono/aws-lambda";
 import { Resource } from "sst";
-import { subjects } from "@functional-infra/core/auth";
 
 const iss = issuer({
   subjects,
