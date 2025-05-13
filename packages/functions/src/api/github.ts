@@ -6,6 +6,10 @@ import { SignJWT, jwtVerify } from "jose";
 import { Resource } from "sst";
 import { z } from "zod";
 import { requireAuth } from "./common";
+import { TeamMember } from "@functional-infra/core/team";
+import { Project } from "@functional-infra/core/project";
+import { Deployment } from "@functional-infra/core/deployment";
+import { Environment } from "@functional-infra/core/environment";
 
 const webhooks = new Webhooks({
   secret: Resource.GITHUB_WEBHOOK_SECRET.value,
@@ -16,34 +20,33 @@ webhooks.on("installation.deleted", async (event) => {
   await GithubInstallation.del(event.payload.installation.id.toString());
 });
 
-export const githubRouter = new Hono()
-  .get("/installations", requireAuth, async (c) => {
-    const teamId = c.get("subject").properties.defaultTeamId;
-    const installations = await GithubInstallation.list(teamId);
-    return c.json(installations);
-  })
-  .get("/installations/:installationId", requireAuth, async (c) => {
-    const installationId = c.req.param("installationId");
-    const installation = await GithubInstallation.get(
-      installationId,
-      c.get("subject").properties.defaultTeamId,
+webhooks.on("push", async (event) => {
+  const project = await Project.byRepositoryId(event.payload.repository.id);
+  if (project) {
+    const environment = await Environment.find(
+      project.id,
+      event.payload.ref === `refs/heads/${project.gitProductionBranch}`,
     );
-    return c.json(installation);
-  })
-  .get(
-    "/installations/:installationId/repositories",
-    requireAuth,
-    async (c) => {
-      const installationId = c.req.param("installationId");
-      const repositories = await GithubInstallation.listRepositories(
-        installationId,
-        c.get("subject").properties.defaultTeamId,
-      );
-      return c.json(repositories);
-    },
-  )
-  .get("/install", requireAuth, async (c) => {
-    const teamId = c.get("subject").properties.defaultTeamId;
+    await Deployment.create({
+      projectId: project.id,
+      status: "queued",
+      gitCommitAuthor: event.payload.head_commit?.author.name,
+      gitCommitAuthorEmail: event.payload.head_commit?.author.email,
+      gitCommitHash: event.payload.head_commit?.id,
+      gitCommitMessage: event.payload.head_commit?.message,
+      gitCommitDate: event.payload.head_commit?.timestamp
+        ? new Date(event.payload.head_commit.timestamp)
+        : undefined,
+      environmentId: environment.id,
+      trigger: "push",
+    });
+  }
+});
+
+export const githubRouter = new Hono()
+  .get("/install/:teamId", requireAuth, async (c) => {
+    const teamId = c.req.param("teamId");
+    await TeamMember.assert(c.get("subject").properties.id, teamId);
     const state = await new SignJWT({
       teamId,
     })

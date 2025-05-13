@@ -9,6 +9,8 @@ import {
 } from "./secrets";
 import { bucket } from "./storage";
 
+export const deployQueue = new sst.aws.Queue("DeployQueue");
+
 export const api = new sst.aws.Function("MyApi", {
   url: true,
   link: [
@@ -20,6 +22,7 @@ export const api = new sst.aws.Function("MyApi", {
     GITHUB_WEBHOOK_SECRET,
     GITHUB_STATE_SECRET,
     redis,
+    deployQueue,
   ],
   handler: "packages/functions/src/api/index.handler",
 });

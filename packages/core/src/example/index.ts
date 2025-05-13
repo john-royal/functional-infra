@@ -1,13 +1,7 @@
-import assert from "node:assert";
 import { createId } from "@paralleldrive/cuid2";
-import {
-  and,
-  createTransaction,
-  eq,
-  getTableColumns,
-  schema,
-  useTransaction,
-} from "../db";
+import assert from "node:assert";
+import { createTransaction, eq, schema, useTransaction } from "../db";
+import { Team, TeamMember } from "../team";
 
 export namespace User {
   export function findOrCreate(
@@ -115,65 +109,6 @@ export namespace GitHubAccount {
   }) {
     return useTransaction(async (tx) => {
       await tx.insert(schema.githubAccounts).values(profile);
-    });
-  }
-}
-
-export namespace Team {
-  export function list(userId: string) {
-    return useTransaction(async (tx) => {
-      return tx
-        .select(getTableColumns(schema.teams))
-        .from(schema.teamMembers)
-        .innerJoin(schema.teams, eq(schema.teamMembers.teamId, schema.teams.id))
-        .where(eq(schema.teamMembers.userId, userId));
-    });
-  }
-
-  export function byId(userId: string, teamId: string) {
-    return useTransaction(async (tx) => {
-      const teams = await tx
-        .select()
-        .from(schema.teamMembers)
-        .innerJoin(schema.teams, eq(schema.teamMembers.teamId, schema.teams.id))
-        .where(
-          and(
-            eq(schema.teamMembers.userId, userId),
-            eq(schema.teamMembers.teamId, teamId),
-          ),
-        );
-      assert(teams.length === 1, `Team ${teamId} not found`);
-      return teams[0];
-    });
-  }
-
-  export function create(name: string, type: "personal" | "organization") {
-    return useTransaction(async (tx) => {
-      const id = createId();
-      const slug = name.toLowerCase().replace(/\s+/g, "-");
-      await tx.insert(schema.teams).values({
-        id,
-        name,
-        slug,
-        type,
-      });
-      return { id, slug };
-    });
-  }
-}
-
-export namespace TeamMember {
-  export function create(
-    userId: string,
-    teamId: string,
-    role: "owner" | "admin" | "member",
-  ) {
-    return useTransaction(async (tx) => {
-      await tx.insert(schema.teamMembers).values({
-        userId,
-        teamId,
-        role,
-      });
     });
   }
 }

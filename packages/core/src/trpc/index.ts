@@ -1,9 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { and, db, eq, getTableColumns, schema } from "../db";
-import { Team, User } from "../example";
+import { db, eq, schema } from "../db";
+import { User } from "../example";
 import { GithubInstallation } from "../github-installation";
 import { Project } from "../project";
+import { Team, TeamMember } from "../team";
 import { createTRPCRouter, protectedProcedure } from "./trpc";
 
 export const router = createTRPCRouter({
@@ -20,28 +21,55 @@ export const router = createTRPCRouter({
       .input(z.object({ slug: z.string() }))
       .query(async ({ ctx, input }) => {
         const [team] = await db
-          .select(getTableColumns(schema.teams))
+          .select()
           .from(schema.teams)
           .where(eq(schema.teams.slug, input.slug))
           .limit(1);
-        const [memberCount, projects] = await Promise.all([
-          db.$count(
-            db
-              .select()
-              .from(schema.teamMembers)
-              .where(
-                and(
-                  eq(schema.teamMembers.teamId, team.id),
-                  eq(schema.teamMembers.userId, ctx.subject.properties.id),
-                ),
-              ),
-          ),
+        const [projects] = await Promise.all([
           Project.list(team.id),
+          TeamMember.assert(ctx.subject.properties.id, team.id),
         ]);
-        if (memberCount === 0) {
-          throw new TRPCError({ code: "UNAUTHORIZED" });
-        }
         return { team, projects };
+      }),
+  },
+
+  project: {
+    get: protectedProcedure
+      .input(z.object({ project: z.string() }))
+      .query(async ({ ctx, input }) => {
+        const [project] = await db
+          .select()
+          .from(schema.projects)
+          .where(eq(schema.projects.slug, input.project))
+          .limit(1);
+        await TeamMember.assert(ctx.subject.properties.id, project.teamId);
+        if (!project) {
+          throw new TRPCError({ code: "NOT_FOUND" });
+        }
+        return project;
+      }),
+
+    create: protectedProcedure
+      .input(
+        z.object({
+          githubInstallationId: z.string(),
+          githubRepositoryId: z.number(),
+          githubRepositoryName: z.string(),
+          teamId: z.string(),
+          name: z.string(),
+        }),
+      )
+      .mutation(async ({ ctx, input }) => {
+        await TeamMember.assert(ctx.subject.properties.id, input.teamId);
+        const projectId = await Project.create({
+          name: input.name,
+          slug: input.name.toLowerCase().replace(/\s+/g, "-"),
+          teamId: input.teamId,
+          githubInstallationId: input.githubInstallationId,
+          githubRepositoryId: input.githubRepositoryId,
+          githubRepositoryName: input.githubRepositoryName,
+        });
+        return projectId;
       }),
   },
 

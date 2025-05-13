@@ -6,6 +6,8 @@ import {
   pgTable,
   primaryKey,
   timestamp,
+  unique,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -98,51 +100,66 @@ export const githubInstallations = pgTable("github_installations", {
 export type NewGitHubInstallation = typeof githubInstallations.$inferInsert;
 export type GitHubInstallation = typeof githubInstallations.$inferSelect;
 
-export const projects = pgTable("projects", {
-  id: cuid().primaryKey(),
-  teamId: cuid()
-    .notNull()
-    .references(() => teams.id),
-  githubInstallationId: cuid()
-    .notNull()
-    .references(() => githubInstallations.id),
-  githubRepositoryId: bigint({ mode: "number" }).notNull(),
-  githubRepositoryName: varchar({ length: 255 }).notNull(),
-  gitProductionBranch: varchar({ length: 100 }).notNull().default("main"),
-  name: varchar({ length: 255 }).notNull(),
-  slug: varchar({ length: 255 }).notNull().unique(),
-  ...timestamps,
-});
+export const projects = pgTable(
+  "projects",
+  {
+    id: cuid().primaryKey(),
+    teamId: cuid()
+      .notNull()
+      .references(() => teams.id),
+    githubInstallationId: cuid()
+      .notNull()
+      .references(() => githubInstallations.id),
+    githubRepositoryId: bigint({ mode: "number" }).notNull(),
+    githubRepositoryName: varchar({ length: 255 }).notNull(),
+    gitProductionBranch: varchar({ length: 100 }).notNull().default("main"),
+    name: varchar({ length: 255 }).notNull(),
+    slug: varchar({ length: 255 }).notNull(),
+    ...timestamps,
+  },
+  (t) => [uniqueIndex().on(t.teamId, t.slug)],
+);
 
 export type NewProject = typeof projects.$inferInsert;
 export type Project = typeof projects.$inferSelect;
 
-export const environments = pgTable("environments", {
-  id: cuid().primaryKey(),
-  projectId: cuid()
-    .notNull()
-    .references(() => projects.id),
-  name: varchar({ length: 255 }).notNull(),
-  slug: varchar({ length: 255 }).notNull().unique(),
-  ...timestamps,
-});
+export const environments = pgTable(
+  "environments",
+  {
+    id: cuid().primaryKey(),
+    projectId: cuid()
+      .notNull()
+      .references(() => projects.id),
+    name: varchar({ length: 255 }).notNull(),
+    isProduction: boolean().notNull(),
+    ...timestamps,
+  },
+  (t) => [
+    unique().on(t.projectId, t.name),
+    unique().on(t.projectId, t.isProduction),
+  ],
+);
 
 export type NewEnvironment = typeof environments.$inferInsert;
 export type Environment = typeof environments.$inferSelect;
 
-export const environmentVariables = pgTable("environment_variables", {
-  id: cuid().primaryKey(),
-  projectId: cuid()
-    .notNull()
-    .references(() => projects.id),
-  environmentId: cuid()
-    .notNull()
-    .references(() => environments.id),
-  name: varchar({ length: 255 }).notNull(),
-  value: varchar({ length: 255 }).notNull(),
-  isSecret: boolean().notNull(),
-  ...timestamps,
-});
+export const environmentVariables = pgTable(
+  "environment_variables",
+  {
+    id: cuid().primaryKey(),
+    projectId: cuid()
+      .notNull()
+      .references(() => projects.id),
+    environmentId: cuid()
+      .notNull()
+      .references(() => environments.id),
+    name: varchar({ length: 255 }).notNull(),
+    value: varchar({ length: 255 }).notNull(),
+    isSecret: boolean().notNull(),
+    ...timestamps,
+  },
+  (t) => [unique().on(t.projectId, t.environmentId, t.name)],
+);
 
 export type NewEnvironmentVariable = typeof environmentVariables.$inferInsert;
 export type EnvironmentVariable = typeof environmentVariables.$inferSelect;
@@ -168,11 +185,11 @@ export const deployments = pgTable("deployments", {
   environmentId: cuid()
     .notNull()
     .references(() => environments.id),
-  gitCommitHash: varchar({ length: 255 }).notNull(),
-  gitCommitMessage: varchar({ length: 255 }).notNull(),
-  gitCommitAuthor: varchar({ length: 255 }).notNull(),
-  gitCommitAuthorEmail: varchar({ length: 255 }).notNull(),
-  gitCommitDate: timestamp().notNull(),
+  gitCommitHash: varchar({ length: 255 }),
+  gitCommitMessage: varchar({ length: 255 }),
+  gitCommitAuthor: varchar({ length: 255 }),
+  gitCommitAuthorEmail: varchar({ length: 255 }),
+  gitCommitDate: timestamp(),
   status: deploymentStatus().notNull(),
   trigger: deploymentTrigger().notNull(),
   ...timestamps,

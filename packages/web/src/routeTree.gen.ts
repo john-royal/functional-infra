@@ -15,7 +15,8 @@ import { Route as AppImport } from './routes/_app'
 import { Route as AuthIndexImport } from './routes/auth.index'
 import { Route as AppIndexImport } from './routes/_app.index'
 import { Route as AuthCallbackImport } from './routes/auth.callback'
-import { Route as AppTeamImport } from './routes/_app.$team'
+import { Route as AppTeamIndexImport } from './routes/_app.$team.index'
+import { Route as AppTeamProjectImport } from './routes/_app.$team.$project'
 
 // Create/Update Routes
 
@@ -42,9 +43,15 @@ const AuthCallbackRoute = AuthCallbackImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const AppTeamRoute = AppTeamImport.update({
-  id: '/$team',
-  path: '/$team',
+const AppTeamIndexRoute = AppTeamIndexImport.update({
+  id: '/$team/',
+  path: '/$team/',
+  getParentRoute: () => AppRoute,
+} as any)
+
+const AppTeamProjectRoute = AppTeamProjectImport.update({
+  id: '/$team/$project',
+  path: '/$team/$project',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -58,13 +65,6 @@ declare module '@tanstack/react-router' {
       fullPath: ''
       preLoaderRoute: typeof AppImport
       parentRoute: typeof rootRoute
-    }
-    '/_app/$team': {
-      id: '/_app/$team'
-      path: '/$team'
-      fullPath: '/$team'
-      preLoaderRoute: typeof AppTeamImport
-      parentRoute: typeof AppImport
     }
     '/auth/callback': {
       id: '/auth/callback'
@@ -87,59 +87,85 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthIndexImport
       parentRoute: typeof rootRoute
     }
+    '/_app/$team/$project': {
+      id: '/_app/$team/$project'
+      path: '/$team/$project'
+      fullPath: '/$team/$project'
+      preLoaderRoute: typeof AppTeamProjectImport
+      parentRoute: typeof AppImport
+    }
+    '/_app/$team/': {
+      id: '/_app/$team/'
+      path: '/$team'
+      fullPath: '/$team'
+      preLoaderRoute: typeof AppTeamIndexImport
+      parentRoute: typeof AppImport
+    }
   }
 }
 
 // Create and export the route tree
 
 interface AppRouteChildren {
-  AppTeamRoute: typeof AppTeamRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppTeamProjectRoute: typeof AppTeamProjectRoute
+  AppTeamIndexRoute: typeof AppTeamIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppTeamRoute: AppTeamRoute,
   AppIndexRoute: AppIndexRoute,
+  AppTeamProjectRoute: AppTeamProjectRoute,
+  AppTeamIndexRoute: AppTeamIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 export interface FileRoutesByFullPath {
   '': typeof AppRouteWithChildren
-  '/$team': typeof AppTeamRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/': typeof AppIndexRoute
   '/auth': typeof AuthIndexRoute
+  '/$team/$project': typeof AppTeamProjectRoute
+  '/$team': typeof AppTeamIndexRoute
 }
 
 export interface FileRoutesByTo {
-  '/$team': typeof AppTeamRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/': typeof AppIndexRoute
   '/auth': typeof AuthIndexRoute
+  '/$team/$project': typeof AppTeamProjectRoute
+  '/$team': typeof AppTeamIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/_app': typeof AppRouteWithChildren
-  '/_app/$team': typeof AppTeamRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/_app/': typeof AppIndexRoute
   '/auth/': typeof AuthIndexRoute
+  '/_app/$team/$project': typeof AppTeamProjectRoute
+  '/_app/$team/': typeof AppTeamIndexRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/$team' | '/auth/callback' | '/' | '/auth'
+  fullPaths:
+    | ''
+    | '/auth/callback'
+    | '/'
+    | '/auth'
+    | '/$team/$project'
+    | '/$team'
   fileRoutesByTo: FileRoutesByTo
-  to: '/$team' | '/auth/callback' | '/' | '/auth'
+  to: '/auth/callback' | '/' | '/auth' | '/$team/$project' | '/$team'
   id:
     | '__root__'
     | '/_app'
-    | '/_app/$team'
     | '/auth/callback'
     | '/_app/'
     | '/auth/'
+    | '/_app/$team/$project'
+    | '/_app/$team/'
   fileRoutesById: FileRoutesById
 }
 
@@ -173,13 +199,10 @@ export const routeTree = rootRoute
     "/_app": {
       "filePath": "_app.tsx",
       "children": [
-        "/_app/$team",
-        "/_app/"
+        "/_app/",
+        "/_app/$team/$project",
+        "/_app/$team/"
       ]
-    },
-    "/_app/$team": {
-      "filePath": "_app.$team.tsx",
-      "parent": "/_app"
     },
     "/auth/callback": {
       "filePath": "auth.callback.tsx"
@@ -190,6 +213,14 @@ export const routeTree = rootRoute
     },
     "/auth/": {
       "filePath": "auth.index.tsx"
+    },
+    "/_app/$team/$project": {
+      "filePath": "_app.$team.$project.tsx",
+      "parent": "/_app"
+    },
+    "/_app/$team/": {
+      "filePath": "_app.$team.index.tsx",
+      "parent": "/_app"
     }
   }
 }

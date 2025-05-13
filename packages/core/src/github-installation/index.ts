@@ -1,9 +1,8 @@
-import assert from "node:assert";
 import { createId } from "@paralleldrive/cuid2";
+import assert from "node:assert";
 import { App } from "octokit";
 import { Resource } from "sst";
 import { and, eq, schema, useTransaction } from "../db";
-import { redis } from "../redis";
 
 export namespace GithubInstallation {
   export const app = new App({
@@ -77,13 +76,6 @@ export namespace GithubInstallation {
         .where(eq(schema.githubInstallations.installationId, id));
     });
   }
-
-  type ListRepositoriesResponse = {
-    id: number;
-    name: string;
-    url: string;
-    updatedAt: string;
-  }[];
 
   export async function listRepositories(
     installationId: string,
